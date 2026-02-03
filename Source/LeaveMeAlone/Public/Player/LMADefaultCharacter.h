@@ -7,6 +7,7 @@
 #include "LMADefaultCharacter.generated.h"
 
 class UCameraComponent;
+class UDecalComponent;
 class USpringArmComponent;
 
 UCLASS()
@@ -37,7 +38,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -49,7 +50,29 @@ private:
 	float ArmLength = 1400.0f;
 	float FOV = 55.0f;
 
+	/** Camera zoom settings (editable in UE Editor) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom",
+		meta = (ClampMin = "300.0", ClampMax = "3000.0", UIMin = "300.0", UIMax = "3000.0", AllowPrivateAccess = "true"))
+	float MinZoomArmLength = 600.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom",
+		meta = (ClampMin = "300.0", ClampMax = "3000.0", UIMin = "300.0", UIMax = "3000.0", AllowPrivateAccess = "true"))
+	float MaxZoomArmLength = 2200.0f;
+
+	/** How much arm length changes per one wheel step (axis value ~ +/-1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom",
+		meta = (ClampMin = "10.0", ClampMax = "1000.0", UIMin = "10.0", UIMax = "1000.0", AllowPrivateAccess = "true"))
+	float ZoomStep = 150.0f;
+
+	/** Smoothness: higher = faster interpolation to target */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom",
+		meta = (ClampMin = "1.0", ClampMax = "30.0", UIMin = "1.0", UIMax = "30.0", AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed = 10.0f;
+
+	/** Desired arm length (we smoothly interpolate to it in Tick) */
+	float TargetZoomArmLength = 1400.0f;
+
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-
+	void CameraZoom(float Value);
 };
