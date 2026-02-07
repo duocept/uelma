@@ -8,10 +8,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/LMAHealthComponent.h"
+#include "Components/LMAWeaponComponent.h"
 #include "GameFramework/CharacterMovementComponent.h" // Важно! Включаем компонент движения
 #include "Engine/Engine.h"							  // Для отладочных сообщений на экране
 
-// Sets default values
+// Устанавливаем значения по умолчанию
 ALMADefaultCharacter::ALMADefaultCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -33,6 +34,8 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 
 	HealthComponent = CreateDefaultSubobject<ULMAHealthComponent>("HealthComponent");
 
+	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
@@ -52,7 +55,7 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	CurrentStamina = MaxStamina; // Начинаем с полной выносливостью
 }
 
-// Called when the game starts or when spawned
+// Вызываем когда игра начинается или происходит спаун
 void ALMADefaultCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -121,6 +124,13 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	// --- Привязка новых действий для спринта ---
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ALMADefaultCharacter::StartSprint); // При нажатии
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ALMADefaultCharacter::StopSprint); // При отпускании
+
+	// --- Привязка выстрела
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &ULMAWeaponComponent::StopFire);
+
+	// --- Перезарядка
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Reload);
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)

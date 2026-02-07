@@ -10,7 +10,8 @@ class UCameraComponent;
 class UDecalComponent;
 class USpringArmComponent;
 class ULMAHealthComponent;
-class UCharacterMovementComponent; // Добавлено для удобства доступа к компоненту движения
+class UCharacterMovementComponent;
+class ULMAWeaponComponent;
 
 // Определение перечисления для состояния движения.
 // Это позволяет легко отслеживать, чем занимается персонаж (нормальное движение, спринт и т.д.).
@@ -44,6 +45,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components|Health")
 	ULMAHealthComponent* HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	ULMAWeaponComponent* WeaponComponent;
 
 	UPROPERTY()
 	UDecalComponent* CurrentCursor = nullptr;
