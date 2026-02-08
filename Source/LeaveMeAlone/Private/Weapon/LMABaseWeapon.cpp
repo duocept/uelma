@@ -62,7 +62,7 @@ void ALMABaseWeapon::Shoot()
 void ALMABaseWeapon::DecrementBullets()
 {
 	CurrentAmmoWeapon.Bullets = FMath::Max(0, CurrentAmmoWeapon.Bullets - 1);
-	UE_LOG(LogWeapon, Display, TEXT("Bullets = %d"), CurrentAmmoWeapon.Bullets);
+	//UE_LOG(LogWeapon, Display, TEXT("Bullets = %d"), CurrentAmmoWeapon.Bullets);
 
 	// Когда магазин опустел — сообщаем наружу (компонент решит, перезаряжаться ли).
 	if (IsCurrentClipEmpty())

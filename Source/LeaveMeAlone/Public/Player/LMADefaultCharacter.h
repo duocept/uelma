@@ -12,6 +12,7 @@ class USpringArmComponent;
 class ULMAHealthComponent;
 class UCharacterMovementComponent;
 class ULMAWeaponComponent;
+class UUserWidget;
 
 // Определение перечисления для состояния движения.
 // Это позволяет легко отслеживать, чем занимается персонаж (нормальное движение, спринт и т.д.).
@@ -60,6 +61,22 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* DeathMontage;
+
+	// --- Death Screen ---
+
+	// Какой виджет показываем при смерти
+	UPROPERTY(EditDefaultsOnly, Category = "UI|Death")
+	TSubclassOf<UUserWidget> DeathScreenClass;
+
+	// Задержка перед показом
+	UPROPERTY(EditDefaultsOnly, Category = "UI|Death", meta = (ClampMin = "0.0", UIMin = "0.0", UIMax = "5.0"))
+	float DeathScreenDelay = 2.0f;
+
+	// Чтобы не плодить виджеты
+	UPROPERTY()
+	UUserWidget* DeathScreenWidget = nullptr;
+
+	bool bDeathScreenShown = false;
 
 	// --- Новые переменные для спринта ---
 
@@ -135,6 +152,8 @@ private:
 
 	// Методы здоровья (уже были)
 	void OnDeath();
+	FTimerHandle DeathMenuTimer;
+	void ShowDeathScreen();
 	void OnHealthChanged(float NewHealth);
 
 	// Метод поворота (уже был)

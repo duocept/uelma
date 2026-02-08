@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Components/LMAHealthComponent.h"
 #include "Components/LMAWeaponComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h" // Важно! Включаем компонент движения
 #include "Engine/Engine.h"							  // Для отладочных сообщений на экране
 
@@ -165,6 +167,11 @@ void ALMADefaultCharacter::CameraZoom(float Value)
 
 void ALMADefaultCharacter::OnDeath()
 {
+	if (bDeathScreenShown)
+	{
+		return;
+	}
+
 	if (CurrentCursor)
 	{
 		CurrentCursor->DestroyRenderState_Concurrent(); // Деактивируем курсор при смерти
@@ -185,12 +192,55 @@ void ALMADefaultCharacter::OnDeath()
 	}
 
 	StopSprint(); // Убедимся, что спринт прекращен при смерти
+
+	// Показать экран смерти через 2 секунды ---
+	GetWorldTimerManager().ClearTimer(DeathMenuTimer);
+	GetWorldTimerManager().SetTimer(DeathMenuTimer, this, &ALMADefaultCharacter::ShowDeathScreen, DeathScreenDelay, false);
+}
+
+void ALMADefaultCharacter::ShowDeathScreen()
+{
+	if (bDeathScreenShown)
+	{
+		return;
+	}
+	bDeathScreenShown = true;
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+	if (!PC || !DeathScreenClass)
+	{
+		return;
+	}
+
+	// Если вдруг уже был виджет — уберём
+	if (DeathScreenWidget)
+	{
+		DeathScreenWidget->RemoveFromParent();
+		DeathScreenWidget = nullptr;
+	}
+
+	DeathScreenWidget = CreateWidget<UUserWidget>(PC, DeathScreenClass);
+	if (!DeathScreenWidget)
+	{
+		return;
+	}
+
+	DeathScreenWidget->AddToViewport(500);
+
+	//"заморозить" игру или просто отдать ввод в UI
+	UGameplayStatics::SetGamePaused(this, true);
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputMode.SetWidgetToFocus(DeathScreenWidget->TakeWidget());
+	PC->SetInputMode(InputMode);
+	PC->bShowMouseCursor = true;
 }
 
 void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
 {
 	// Отладочное сообщение о здоровье
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
 }
 
 void ALMADefaultCharacter::RotationPlayerOnCursor()
